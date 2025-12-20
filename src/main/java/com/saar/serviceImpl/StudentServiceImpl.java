@@ -22,7 +22,6 @@ public class StudentServiceImpl implements StudentService {
         log.info("Creating student: {}", student);
         try {
             repository.save(student);
-            log.debug("Student saved in repository: {}", student);
             return "Student created successfully";
         } catch (Exception e) {
             log.error("Error while creating student: {}", student, e);
