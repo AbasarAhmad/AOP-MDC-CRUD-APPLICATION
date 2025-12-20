@@ -23,9 +23,9 @@ public class LoggingAspect {
 
         long startTime = System.currentTimeMillis();
 
-        String firstName = null;
-        String lastName  = null;
-        String email     = null;
+        String firstName = "-";
+        String lastName  = "-";
+        String email     = "-";
         String httpMethod = null;
 
         try {
@@ -38,7 +38,7 @@ public class LoggingAspect {
                 }
             }
 
-            /* ================= Extract HTTP Method ================= */
+            /* ================= HTTP Info ================= */
             ServletRequestAttributes attributes =
                     (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
@@ -46,31 +46,28 @@ public class LoggingAspect {
                 HttpServletRequest request = attributes.getRequest();
                 httpMethod = request.getMethod();
             }
-         // Generate correlation id 
-            String correlationId = UUID.randomUUID().toString(); 
-            MDC.put("correlationId", correlationId);
 
-            /* ================= SET MDC ================= */
-            if (httpMethod != null) { // ensures only HTTP/Postman calls
-                MDC.put("httpMethod", httpMethod);
-                MDC.put("firstName", firstName != null ? firstName : "-");
-                MDC.put("lastName",  lastName  != null ? lastName  : "-");
-                MDC.put("email",     email     != null ? email     : "-");
-            }
+            /* ================= MDC ================= */
+            MDC.put("correlationId", UUID.randomUUID().toString());
+            MDC.put("httpMethod", httpMethod);
+            MDC.put("firstName", firstName);
+            MDC.put("lastName", lastName);
+            MDC.put("email", email);
+
+            // 🔥 DEFAULT layer
+            MDC.put("layerType", "Application");
 
             log.info("➡️ AOP BEFORE CONTROLLER");
 
             Object result = joinPoint.proceed();
 
-            long timeTaken = System.currentTimeMillis() - startTime;
-
-            log.info("⬅️ AOP AFTER CONTROLLER | Time Taken: {} ms", timeTaken);
+            log.info("⬅️ AOP AFTER CONTROLLER | Time Taken: {} ms",
+                    System.currentTimeMillis() - startTime);
 
             return result;
 
         } finally {
-            /* ================= VERY IMPORTANT ================= */
-            MDC.clear(); // prevents memory/thread leak
+            MDC.clear();
         }
     }
 }

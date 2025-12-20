@@ -1,5 +1,6 @@
 package com.saar.repository;
 
+import org.slf4j.MDC;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -37,6 +38,7 @@ public class StudentRepository {
     };
 
     public int save(Student student) {
+    	 MDC.put("layerType", "DB"); 
         log.info("Saving student: {}", student);
         int rows = jdbcTemplate.update(
                 StudentSql.INSERT_STUDENT,
@@ -46,6 +48,7 @@ public class StudentRepository {
                 student.getMajor()
         );
         log.debug("Rows affected after save: {}", rows);
+        MDC.put("layerType", "Application");
         return rows;
     }
 
