@@ -27,6 +27,7 @@ public class LoggingAspect {
         String lastName  = "-";
         String email     = "-";
         String httpMethod = null;
+        String endpoint   = "-";
 
         try {
             /* ================= Extract Request Body ================= */
@@ -45,11 +46,19 @@ public class LoggingAspect {
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
                 httpMethod = request.getMethod();
+
+                // 🔥 Extract LAST endpoint
+                String uri = request.getRequestURI(); // /api/students
+                if (uri != null && !uri.isBlank()) {
+                    String[] parts = uri.split("/");
+                    endpoint = parts[parts.length - 1]; // students
+                }
             }
 
             /* ================= MDC ================= */
             MDC.put("correlationId", UUID.randomUUID().toString());
             MDC.put("httpMethod", httpMethod);
+            MDC.put("endpoint", endpoint);
             MDC.put("firstName", firstName);
             MDC.put("lastName", lastName);
             MDC.put("email", email);
