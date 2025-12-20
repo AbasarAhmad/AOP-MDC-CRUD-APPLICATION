@@ -40,6 +40,8 @@ public class StudentRepository {
     public int save(Student student) {
     	 MDC.put("layerType", "DB"); 
         log.info("Saving student: {}", student);
+        long startTime = System.currentTimeMillis();
+        MDC.put("queryExecuted", "YES");
         int rows = jdbcTemplate.update(
                 StudentSql.INSERT_STUDENT,
                 student.getFirstName(),
@@ -47,7 +49,12 @@ public class StudentRepository {
                 student.getEmail(),
                 student.getMajor()
         );
-        log.debug("Rows affected after save: {}", rows);
+        long timeTaken = System.currentTimeMillis() - startTime;
+        MDC.put("queryTimeTaken", timeTaken + "ms");
+        
+        log.info("Rows affected after save: {}", rows);
+        MDC.remove("queryExecuted");
+        MDC.remove("queryTimeTaken");
         MDC.put("layerType", "Application");
         return rows;
     }
